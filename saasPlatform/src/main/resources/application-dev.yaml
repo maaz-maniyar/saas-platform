@@ -8,12 +8,15 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
 
+
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
         multiTenancy: SCHEMA
+        tenant_identifier_resolver: com.maaz.saasPlatform.tenant.resolver.HeaderTenantIdentifierResolver
+        multi_tenant_connection_provider: com.maaz.saasPlatform.config.persistence.SchemaMultiTenantConnectionProvider
 
 
 management:

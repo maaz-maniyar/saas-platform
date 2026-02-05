@@ -1,6 +1,7 @@
 package com.maaz.saasPlatform.tenant.service;
 
 import com.maaz.saasPlatform.audit.annotation.Auditable;
+import com.maaz.saasPlatform.tenant.context.TenantContext;
 import com.maaz.saasPlatform.tenant.entity.Tenant;
 import com.maaz.saasPlatform.tenant.repository.TenantRepository;
 import org.springframework.stereotype.Service;
@@ -26,18 +27,24 @@ public class TenantService {
     @Transactional
     public Tenant createTenant(String tenantId) {
 
-        return tenantRepository.findByTenantId(tenantId)
-                .orElseGet(() -> {
-                    String schema = "tenant_" + tenantId;
+        TenantContext.setTenant("public");
 
-                    provisioningService.createSchema(schema);
+        try {
+            return tenantRepository.findByTenantId(tenantId)
+                    .orElseGet(() -> {
+                        String schema = "tenant_" + tenantId;
 
-                    Tenant tenant = new Tenant();
-                    tenant.setTenantId(tenantId);
-                    tenant.setSchemaName(schema);
-                    tenant.setActive(true);
+                        provisioningService.createSchema(schema);
 
-                    return tenantRepository.save(tenant);
-                });
+                        Tenant tenant = new Tenant();
+                        tenant.setTenantId(tenantId);
+                        tenant.setSchemaName(schema);
+                        tenant.setActive(true);
+
+                        return tenantRepository.save(tenant);
+                    });
+        } finally {
+            TenantContext.clear();
+        }
     }
 }

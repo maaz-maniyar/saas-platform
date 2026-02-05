@@ -1,6 +1,7 @@
 package com.maaz.saasPlatform.config.security;
 
 import com.maaz.saasPlatform.auth.filter.JwtAuthFilter;
+import com.maaz.saasPlatform.tenant.filter.TenantFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,9 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final TenantFilter tenantFilter;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, TenantFilter tenantFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.tenantFilter = tenantFilter;
     }
 
     @Bean
@@ -33,9 +37,9 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/platform/tenants/token").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/platform/tenants").authenticated()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
