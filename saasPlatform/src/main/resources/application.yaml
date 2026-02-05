@@ -5,3 +5,13 @@ spring:
     active: dev
   server:
     port: 8080
+resilience4j:
+  ratelimiter:
+    instances:
+      global-api:
+        limit-for-period: 5
+        limit-refresh-period: 10s
+        timeout-duration: 0
+
+
+

@@ -14,7 +14,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-        # ===== MULTI TENANCY =====
         multiTenancy: SCHEMA
         tenant_identifier_resolver: com.maaz.saasPlatform.tenant.resolver.HeaderTenantIdentifierResolver
 
