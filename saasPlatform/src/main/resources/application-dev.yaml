@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/saas_platform
@@ -6,22 +9,29 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
-    show-sql: true
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
         multiTenancy: SCHEMA
-        tenant_identifier_resolver: com.maaz.saasPlatform.tenant.resolver.HeaderTenantIdentifierResolver
 
-server:
-  port: 8080
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+
+jwt:
+  secret: saas-platform-dev-secret-1234567890
+  expiration: 3600000   # 1 hour (ms)
+
+
+resilience4j:
+  ratelimiter:
+    instances:
+      globalApiLimiter:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0

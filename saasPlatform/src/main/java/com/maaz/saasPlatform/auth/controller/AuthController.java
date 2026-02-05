@@ -1,31 +1,23 @@
 package com.maaz.saasPlatform.auth.controller;
 
-import com.maaz.saasPlatform.auth.util.JwtUtil;
-import org.springframework.security.authentication.*;
-import org.springframework.security.core.Authentication;
+import com.maaz.saasPlatform.auth.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password) {
-
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
-
-        var principal = auth.getName();
-        var role = auth.getAuthorities().iterator().next().getAuthority();
-
-        return JwtUtil.generateToken(principal, role);
+    public String login(
+            @RequestParam String email,
+            @RequestParam String password
+    ) {
+        return authService.login(email, password);
     }
 }

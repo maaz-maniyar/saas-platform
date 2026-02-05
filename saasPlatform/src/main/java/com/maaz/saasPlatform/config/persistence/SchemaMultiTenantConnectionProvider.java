@@ -1,13 +1,11 @@
 package com.maaz.saasPlatform.config.persistence;
 
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Component
 public class SchemaMultiTenantConnectionProvider
         implements MultiTenantConnectionProvider<String> {
 

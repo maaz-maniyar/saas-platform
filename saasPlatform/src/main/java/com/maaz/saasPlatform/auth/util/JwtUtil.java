@@ -1,29 +1,44 @@
 package com.maaz.saasPlatform.auth.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 
+@Component
 public class JwtUtil {
 
-    private static final String SECRET =
-            "THIS_IS_A_VERY_LONG_SECRET_KEY_FOR_JWT_SIGNING_123456";
+    private static final long EXPIRATION = 1000 * 60 * 60;
+    private final SecretKey secretKey;
 
-    private static final long EXPIRATION = 1000 * 60 * 60; // 1 hour
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
+        this.secretKey = Keys.hmacShaKeyFor(
+                secret.getBytes(StandardCharsets.UTF_8)
+        );
+    }
 
-    private static final Key key =
-            Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
-
-    public static String generateToken(String username, String role) {
+    public Claims validateToken(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+    public String generateToken(String email, String tenantId, String role) {
         return Jwts.builder()
-                .subject(username)                // still valid
+                .setSubject(email)
+                .claim("tenantId", tenantId)
                 .claim("role", role)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(key)                    // algorithm inferred
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 }
+
