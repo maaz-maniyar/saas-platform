@@ -47,4 +47,14 @@ public class TenantService {
             TenantContext.clear();
         }
     }
+
+    public java.util.List<Tenant> getAllTenants() {
+        TenantContext.setTenant("public");
+
+        try {
+            return tenantRepository.findAll();
+        } finally {
+            TenantContext.clear();
+        }
+    }
 }

@@ -24,6 +24,6 @@ public class HeaderTenantIdentifierResolver
 
     @Override
     public boolean validateExistingCurrentSessions() {
-        return true;
+        return false;
     }
 }

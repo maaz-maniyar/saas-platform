@@ -9,9 +9,8 @@ resilience4j:
   ratelimiter:
     instances:
       global-api:
-        limit-for-period: 5
-        limit-refresh-period: 10s
+        limit-for-period: 1000
+        limit-refresh-period: 1s
         timeout-duration: 0
-
 
 

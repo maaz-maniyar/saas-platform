@@ -3,15 +3,18 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/saas_platform
+    url: jdbc:postgresql://localhost:5432/saas_platform?currentSchema=public
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-init-sql: SET search_path TO public
 
 
   jpa:
+    open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         multiTenancy: SCHEMA
@@ -30,11 +33,22 @@ jwt:
   secret: saas-platform-dev-secret-1234567890
   expiration: 3600000   # 1 hour (ms)
 
+bootstrap:
+  super-admin:
+    email: superadmin@platform.com
+    password: ChangeMe123!
+
 
 resilience4j:
   ratelimiter:
     instances:
-      globalApiLimiter:
-        limit-for-period: 10
+      global-api:
+        limit-for-period: 1000
         limit-refresh-period: 1s
         timeout-duration: 0
+
+aws:
+  region: eu-north-1
+  upload-url-expiration-seconds: 900
+  s3:
+    bucket: bugreplay-videos-maaz

@@ -1,7 +1,6 @@
 package com.maaz.saasPlatform.auth.filter;
 
 import com.maaz.saasPlatform.auth.util.JwtUtil;
-import com.maaz.saasPlatform.security.RateLimiterService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,14 +21,9 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final RateLimiterService rateLimiterService;
 
-    public JwtAuthFilter(
-            JwtUtil jwtUtil,
-            RateLimiterService rateLimiterService
-    ) {
+    public JwtAuthFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.rateLimiterService = rateLimiterService;
     }
 
     @Override
@@ -38,10 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        System.out.println("JwtAuthFilter HIT: " + request.getRequestURI());
-
         String authHeader = request.getHeader("Authorization");
-        System.out.println("AUTH HEADER = " + authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
@@ -50,15 +41,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Claims claims = jwtUtil.validateToken(token);
 
                 String role = claims.get("role", String.class);
+                String userType = claims.get("userType", String.class);
+                String tenantId = claims.get("tenantId", String.class);
 
-                var authority =
-                        new SimpleGrantedAuthority("ROLE_" + role);
+                List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+
+                if (userType != null && !userType.isBlank()) {
+                    authorities.add(new SimpleGrantedAuthority("USER_TYPE_" + userType));
+                }
 
                 var auth = new UsernamePasswordAuthenticationToken(
                         claims.getSubject(),
                         null,
-                        List.of(authority)
+                        authorities
                 );
+
+                request.setAttribute("tenantId", tenantId);
+                request.setAttribute("role", role);
+                request.setAttribute("userType", userType);
 
                 SecurityContextHolder
                         .getContext()

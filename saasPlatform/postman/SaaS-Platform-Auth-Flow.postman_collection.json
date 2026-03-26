@@ -1,0 +1,696 @@
+{
+  "info": {
+    "_postman_id": "c0f8cc93-1d94-4e85-a0a2-0d0ee1fc0001",
+    "name": "SaaS Platform Auth Flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "End-to-end auth, tenant, user, and bug flow matching the passing integration tests."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "tenantId",
+      "value": "acme"
+    },
+    {
+      "key": "superAdminEmail",
+      "value": "superadmin@platform.com"
+    },
+    {
+      "key": "superAdminPassword",
+      "value": "ChangeMe123!"
+    },
+    {
+      "key": "tenantAdminEmail",
+      "value": "admin@acme.com"
+    },
+    {
+      "key": "tenantAdminPassword",
+      "value": "Admin123!"
+    },
+    {
+      "key": "testerEmail",
+      "value": "tester@acme.com"
+    },
+    {
+      "key": "testerPassword",
+      "value": "Tester123!"
+    },
+    {
+      "key": "devEmail",
+      "value": "dev@acme.com"
+    },
+    {
+      "key": "devPassword",
+      "value": "Dev123!"
+    },
+    {
+      "key": "superAdminToken",
+      "value": ""
+    },
+    {
+      "key": "tenantAdminToken",
+      "value": ""
+    },
+    {
+      "key": "testerToken",
+      "value": ""
+    },
+    {
+      "key": "devToken",
+      "value": ""
+    },
+    {
+      "key": "bugId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Login Super Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('superAdminToken', data.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\",\n  \"tenantId\": \"public\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Create Tenant",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/platform/tenants?tenantId={{tenantId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "platform",
+            "tenants"
+          ],
+          "query": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Create Tenant Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{tenantAdminEmail}}\",\n  \"password\": \"{{tenantAdminPassword}}\",\n  \"role\": \"TENANT_ADMIN\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/platform/tenants/{{tenantId}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "platform",
+            "tenants",
+            "{{tenantId}}",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Create Tester",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testerEmail}}\",\n  \"password\": \"{{testerPassword}}\",\n  \"role\": \"USER\",\n  \"userType\": \"TESTER\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/platform/tenants/{{tenantId}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "platform",
+            "tenants",
+            "{{tenantId}}",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Create Dev",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{devEmail}}\",\n  \"password\": \"{{devPassword}}\",\n  \"role\": \"USER\",\n  \"userType\": \"DEV\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/platform/tenants/{{tenantId}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "platform",
+            "tenants",
+            "{{tenantId}}",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Login Tenant Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('tenantAdminToken', data.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{tenantAdminEmail}}\",\n  \"password\": \"{{tenantAdminPassword}}\",\n  \"tenantId\": \"{{tenantId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Login Tester",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('testerToken', data.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testerEmail}}\",\n  \"password\": \"{{testerPassword}}\",\n  \"tenantId\": \"{{tenantId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Login Dev",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('devToken', data.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{devEmail}}\",\n  \"password\": \"{{devPassword}}\",\n  \"tenantId\": \"{{tenantId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. Tenant Admin Get Tenant Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tenantAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tenant/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenant",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10. Tester Create Bug",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('bugId', data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{testerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Login page bug\",\n  \"description\": \"Broken login flow\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11. Tester Get Bugs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{testerToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs"
+          ]
+        }
+      }
+    },
+    {
+      "name": "12. Tester Replace Bug",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{testerToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Login page bug updated\",\n  \"description\": \"Updated by tester\",\n  \"status\": \"IN_PROGRESS\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs/{{bugId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs",
+            "{{bugId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "13. Dev Patch Bug",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{devToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"RESOLVED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs/{{bugId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs",
+            "{{bugId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "14. Dev Create Bug Should Fail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 403', function () {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{devToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Dev should not create\",\n  \"description\": \"Forbidden\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs"
+          ]
+        }
+      }
+    },
+    {
+      "name": "15. Dev Replace Bug Should Fail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 403', function () {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{devToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Dev should not replace\",\n  \"description\": \"Forbidden\",\n  \"status\": \"OPEN\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs/{{bugId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs",
+            "{{bugId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "16. Super Admin Get Tenant Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{superAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/platform/tenants/{{tenantId}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "platform",
+            "tenants",
+            "{{tenantId}}",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "17. Tenant Admin Get Platform Users Should Fail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 403', function () {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tenantAdminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/platform/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "platform",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "18. Tenant Mismatch Should Fail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 403', function () {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{testerToken}}"
+          },
+          {
+            "key": "X-Tenant-ID",
+            "value": "wrong-tenant"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/bugs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "bugs"
+          ]
+        }
+      }
+    }
+  ]
+}

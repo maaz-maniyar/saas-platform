@@ -17,7 +17,9 @@ public class SchemaMultiTenantConnectionProvider
 
     @Override
     public Connection getAnyConnection() throws SQLException {
-        return dataSource.getConnection();
+        Connection connection = dataSource.getConnection();
+        connection.createStatement().execute("SET search_path TO public");
+        return connection;
     }
 
     @Override

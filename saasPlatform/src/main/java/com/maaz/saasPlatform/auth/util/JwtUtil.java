@@ -10,17 +10,23 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtUtil {
 
-    private static final long EXPIRATION = 1000 * 60 * 60;
+    private final long expiration;
     private final SecretKey secretKey;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
+    public JwtUtil(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long expiration
+    ) {
         this.secretKey = Keys.hmacShaKeyFor(
                 secret.getBytes(StandardCharsets.UTF_8)
         );
+        this.expiration = expiration;
     }
 
     public Claims validateToken(String token) {
@@ -30,14 +36,27 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-    public String generateToken(String email, String tenantId, String role) {
+
+    public String generateToken(
+            String email,
+            String tenantId,
+            String role,
+            String userType
+    ) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tenantId", tenantId);
+        claims.put("role", role);
+
+        if (userType != null) {
+            claims.put("userType", userType);
+        }
+
         return Jwts.builder()
-                .setSubject(email)
-                .claim("tenantId", tenantId)
-                .claim("role", role)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .subject(email)
+                .claims(claims)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 }

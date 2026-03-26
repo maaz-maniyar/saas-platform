@@ -1,5 +1,7 @@
 package com.maaz.saasPlatform.user.model;
 
+import com.maaz.saasPlatform.auth.model.Role;
+import com.maaz.saasPlatform.auth.model.UserType;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,8 +18,13 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_type")
+    private UserType userType;
 
     // getters & setters
 
@@ -45,11 +52,19 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }
